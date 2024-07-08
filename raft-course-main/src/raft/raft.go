@@ -95,11 +95,10 @@ type Raft struct {
 // return currentTerm and whether this server
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) {
-
-	var term int
-	var isleader bool
 	// Your code here (PartA).
-	return term, isleader
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	return rf.currentTerm, rf.role == Leader
 }
 
 func (rf *Raft) becomeFollowerLocked(term int) {
@@ -367,7 +366,7 @@ func (rf *Raft) startReplication(term int) bool {
 	defer rf.mu.Unlock()
 
 	if rf.contextLostLocked(Leader, term) {
-		LOG(rf.me, rf.currentTerm, DLog, "Leader[%d] to %s[T%d]", term, rf.role, rf.currentTerm)
+		LOG(rf.me, rf.currentTerm, DLog, "Leader[T%d] to %s[T%d]", term, rf.role, rf.currentTerm)
 		return false
 	}
 
